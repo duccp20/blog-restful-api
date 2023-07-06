@@ -24,7 +24,6 @@ public class User {
     private String email;
     private String password;
 
-
     @ManyToMany(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL
@@ -35,4 +34,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id")
             )
     private Set<Role> roles;
+
+    private boolean isEnable = false;
 }
