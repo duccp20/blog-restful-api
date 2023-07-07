@@ -4,9 +4,7 @@ import com.example.blogapprestapi.model.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.context.ApplicationEvent;
-import org.springframework.stereotype.Component;
 
-import java.time.Clock;
 
 @Getter
 @Setter

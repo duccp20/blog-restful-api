@@ -1,19 +1,17 @@
 package com.example.blogapprestapi.event.listener;
 
 import com.example.blogapprestapi.event.RegistrationCompleteEvent;
-import com.example.blogapprestapi.exception.BlogApiException;
+import com.example.blogapprestapi.model.entity.Token;
 import com.example.blogapprestapi.model.entity.User;
-import com.example.blogapprestapi.service.RegisterService;
+import com.example.blogapprestapi.repository.TokenRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
-import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-
 import java.io.UnsupportedEncodingException;
 import java.util.UUID;
 
@@ -23,7 +21,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
 
 
     @Autowired
-    private RegisterService registerService;
+    private TokenRepository tokenRepository;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -36,7 +34,8 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
         //tạo token
         String token = UUID.randomUUID().toString();
         //lưu token vào db kèm user
-        registerService.saveTokenAndUser(token, theUser);
+        Token tokenAndUser = new Token(token, theUser);
+        tokenRepository.save(tokenAndUser);
         //gửi mail kèm theo link (link chứa token)
         String url = event.getUrl()+"/api/v1/auth/register/verifyEmail?token="+token;
         try {
@@ -44,7 +43,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
         } catch (MessagingException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
-        log.info("Vui lòng check email" + url);
+        log.info("Vui lòng check email: " + url);
     }
 
 
@@ -65,6 +64,7 @@ public class RegistrationCompleteEventListener implements ApplicationListener<Re
         messageHelper.setSubject(subject);
         messageHelper.setText(mailContent, true);
         mailSender.send(message);
+        log.info("Vui lòng check email: " + url);
     }
 
 }

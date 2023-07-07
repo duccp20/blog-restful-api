@@ -1,13 +1,19 @@
 package com.example.blogapprestapi.controller;
+
 import com.example.blogapprestapi.model.dto.LoginDTO;
 import com.example.blogapprestapi.model.dto.RegisterDTO;
 import com.example.blogapprestapi.model.dto.response.JwtAuthResponse;
+import com.example.blogapprestapi.model.entity.Token;
+import com.example.blogapprestapi.model.entity.User;
 import com.example.blogapprestapi.service.LoginService;
 import com.example.blogapprestapi.service.RegisterService;
+import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.UnsupportedEncodingException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -21,9 +27,9 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> doLogin(@RequestBody LoginDTO loginDTO) {
-        String token = loginService.doLogin(loginDTO);
-        JwtAuthResponse jwtAuthResponse = new JwtAuthResponse();
-        jwtAuthResponse.setToken(token);
+        String token = loginService.doLogin(loginDTO); //handle trong service
+        JwtAuthResponse jwtAuthResponse = new JwtAuthResponse(); //tạo 1 instance của response
+        jwtAuthResponse.setToken(token); //set token cho response
         return ResponseEntity.ok(jwtAuthResponse);
     }
 
@@ -34,13 +40,15 @@ public class AuthController {
     }
 
     @GetMapping("/register/verifyEmail")
-       public ResponseEntity<?> verifyToken(@RequestParam String token) {
-        boolean theToken = registerService.verifyToken(token);
-        if (theToken) {
-            return ResponseEntity.ok("Tài khoản đã được xác thực, vui lòng login!");
-        }
-
-        return ResponseEntity.ok("Tài khoản xác thật thất bại!");
+    public ResponseEntity<?> verifyToken(@RequestParam String token) {
+        String theToken = registerService.verifyToken(token);
+        return ResponseEntity.ok(theToken);
     }
 
+
+    @GetMapping("/register/resend-verification-token")
+    public ResponseEntity<?> resendVerificationToken(@RequestParam String token, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
+        registerService.resendVerificationTokenEmail(token, request);
+        return ResponseEntity.ok("verification token has been sent. Please check mail to verify again!");
+    }
 }

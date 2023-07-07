@@ -9,16 +9,16 @@ import java.util.Date;
 @Setter
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 @Entity
 @Table(name = "token")
 public class Token {
-    private static final int EXPIRATION_TIME = 10;
+    private static final int EXPIRATION_TIME = 1;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String token;
+    private Date expirationTime;
     @OneToOne(
             fetch = FetchType.EAGER,
             cascade = CascadeType.ALL,
@@ -26,7 +26,7 @@ public class Token {
     )
     @JoinColumn(name = "user_id")
     private User user;
-    private Date expirationTime;
+
 
     public Token(String token, User user) {
         super();
@@ -35,9 +35,7 @@ public class Token {
         this.expirationTime = this.getTokenExpirationTime();
     }
 
-    public Token(String token) {
-        super();
-        this.token = token;
+    public Token() {
         this.expirationTime = this.getTokenExpirationTime();
     }
 

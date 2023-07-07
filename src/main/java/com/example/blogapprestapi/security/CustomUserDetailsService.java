@@ -32,7 +32,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .builder()
                 .userName(user.getUsername())
                 .password(user.getPassword())
-                .isEnabled(false)
+                .isEnabled(user.isEnable())
                 .authorities(authorities)
                 .build();
     }
