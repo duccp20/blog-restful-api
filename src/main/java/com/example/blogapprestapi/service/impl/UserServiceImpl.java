@@ -1,15 +1,12 @@
 package com.example.blogapprestapi.service.impl;
 
 import com.example.blogapprestapi.exception.BlogApiException;
-import com.example.blogapprestapi.exception.ResourceNotFoundException;
 import com.example.blogapprestapi.mail.EmailDetails;
 import com.example.blogapprestapi.model.dto.request.PasswordResetRequest;
-import com.example.blogapprestapi.model.dto.response.SendMailResponse;
 import com.example.blogapprestapi.model.entity.PasswordResetToken;
 import com.example.blogapprestapi.model.entity.User;
 import com.example.blogapprestapi.repository.PasswordResetTokenRepository;
 import com.example.blogapprestapi.repository.UserRepository;
-import com.example.blogapprestapi.security.jwt.JwtAuthProvider;
 import com.example.blogapprestapi.service.EmailDetailsService;
 import com.example.blogapprestapi.service.UserService;
 import jakarta.mail.MessagingException;
@@ -18,11 +15,6 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -83,7 +75,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public String createNewPassword(String token, PasswordResetRequest passwordResetRequest) {
-        String url = applicationUrl(servletRequest) + "/api/v1/auth/password-reset";
+        //url resend verify password
+        String urlResend = applicationUrl(servletRequest) + "/api/v1/auth/password-reset/resend-token?token="+token;
         //compare token with token in db
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token).
                 orElseThrow(() -> new BlogApiException(HttpStatus.BAD_REQUEST, "TOKEN NOT FOUND IN SYSTEM!"));
@@ -92,8 +85,8 @@ public class UserServiceImpl implements UserService {
         Calendar calendar = Calendar.getInstance();
         if (!(passwordResetToken.getExpirationTime().getTime() - calendar.getTime().getTime() >= 0)) {
             log.info("URL RESEND VERIFY PASSWORD!");
-            return "Đã hết hạn thời gian đổi mật khẩu, vui lòng click vào link sau để làm lại " +
-                    "<a href=\"" + url + "\">Verify your email to activate your account</a>";
+            return "Đã hết hạn thời gian đổi mật khẩu, vui lòng click vào link sau để gửi lại mail! " +
+                    "<a href=\"" + urlResend + "\">Verify your email to activate your account</a>";
 
         }
         //check password and confirm password
@@ -105,12 +98,56 @@ public class UserServiceImpl implements UserService {
         if(checkNewPassAndOldPass(passwordResetRequest.getNewPassword(), passwordResetToken.getUser())) {
             throw new BlogApiException(HttpStatus.BAD_REQUEST, "New Password equal to Old Password!");
         }
+
+        //validate xong thì đổi mật khẩu = new password
         User user = passwordResetToken.getUser();
         user.setPassword(passwordEncoder.encode(passwordResetRequest.getNewPassword()));
         userRepository.save(user);
+
+        //sau khi save user thì xóa cái token vừa tạo đi
         passwordResetTokenRepository.deleteByToken(token);
         return "Đã đổi mật khẩu thành công!";
         }
+
+    @Override
+    public String handleResendTokenForResetPassword(String token) {
+        PasswordResetToken pass = passwordResetTokenRepository.findByToken(token).orElseThrow(
+                () -> new BlogApiException(HttpStatus.BAD_REQUEST, "Account này này chưa từng xác thực trước đó"));
+
+        //tạo new token
+        String newToken = UUID.randomUUID().toString();
+
+        //set lại token
+        pass.setToken(newToken);
+
+        //set lại expiration time
+        pass.setExpirationTime(new PasswordResetToken().getExpirationTime());
+
+        //save new token
+        passwordResetTokenRepository.save(pass);
+
+
+        //lưu ý là gửi newToken đi (hay nhầm với token cũ lắm)
+        String url = applicationUrl(servletRequest) + "/api/v1/auth/password-reset/create-new-password?token=" + newToken;
+        try {
+            //gửi lại mail
+            EmailDetails emailDetails = EmailDetails
+                    .builder()
+                    .subject("Đổi mật khẩu")
+                    .senderName("Blog For Dev")
+                    .mailRecipient(pass.getUser().getEmail())
+                    .content("<p> Hi, " + pass.getUser().getName() + "! </p>" +
+                            "<p>Please, follow the link below to continue set new password </p>" +
+                            "<a href=\"" + url + "\">Click here</a>" +
+                            "<p>Thank you! <br> Blog For Dev </p>")
+                    .build();
+            emailDetailsService.sendMailWithAttachment(emailDetails);
+            log.info("url for reset password: " + url);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        return "Đã gửi mail thành công! " + url;
+    }
 
 
     private String applicationUrl(HttpServletRequest request) {

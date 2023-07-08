@@ -18,4 +18,6 @@ public interface RegisterService {
     Token generateNewToken(String token);
 
     void resendVerificationTokenEmail(String token, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException;
+
+
 }

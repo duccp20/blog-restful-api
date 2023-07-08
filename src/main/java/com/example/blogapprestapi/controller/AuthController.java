@@ -14,7 +14,6 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
@@ -76,5 +75,10 @@ public class AuthController {
     public ResponseEntity<String> createNewPassword(@RequestParam String token,
                                                  @RequestBody PasswordResetRequest passwordResetRequest) {
         return ResponseEntity.ok(userService.createNewPassword(token, passwordResetRequest));
+    }
+
+    @PostMapping("/password-reset/resend-token")
+    public ResponseEntity<String> resendTokenForResetPassword(@RequestParam String token) {
+        return ResponseEntity.ok(userService.handleResendTokenForResetPassword(token));
     }
 }

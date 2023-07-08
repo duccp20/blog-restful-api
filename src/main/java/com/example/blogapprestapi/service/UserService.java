@@ -8,4 +8,7 @@ public interface UserService {
     void sendMailWithToken(PasswordResetRequest mail, HttpServletRequest request);
 
     String createNewPassword(String token, PasswordResetRequest passwordResetRequest);
+
+
+    String handleResendTokenForResetPassword(String token);
 }

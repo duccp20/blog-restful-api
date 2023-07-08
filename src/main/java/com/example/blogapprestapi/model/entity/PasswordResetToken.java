@@ -10,7 +10,7 @@ import java.util.Date;
 @AllArgsConstructor
 @Entity
 public class PasswordResetToken {
-    private static final int EXPIRATION_TIME = 10;
+    private static final int EXPIRATION_TIME = 1;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
