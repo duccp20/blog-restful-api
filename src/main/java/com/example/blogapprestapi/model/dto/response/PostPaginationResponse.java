@@ -1,6 +1,6 @@
 package com.example.blogapprestapi.model.dto.response;
 
-import com.example.blogapprestapi.model.dto.PostDTO;
+import com.example.blogapprestapi.model.dto.request.PostDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

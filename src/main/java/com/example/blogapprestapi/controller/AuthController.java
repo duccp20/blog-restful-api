@@ -1,16 +1,20 @@
 package com.example.blogapprestapi.controller;
 
-import com.example.blogapprestapi.model.dto.LoginDTO;
-import com.example.blogapprestapi.model.dto.RegisterDTO;
+import com.example.blogapprestapi.model.dto.request.LoginDTO;
+import com.example.blogapprestapi.model.dto.request.PasswordResetRequest;
+import com.example.blogapprestapi.model.dto.request.RegisterDTO;
 import com.example.blogapprestapi.model.dto.response.JwtAuthResponse;
-import com.example.blogapprestapi.model.entity.Token;
-import com.example.blogapprestapi.model.entity.User;
+import com.example.blogapprestapi.model.dto.response.SendMailResponse;
 import com.example.blogapprestapi.service.LoginService;
 import com.example.blogapprestapi.service.RegisterService;
+import com.example.blogapprestapi.service.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
@@ -24,6 +28,8 @@ public class AuthController {
     @Autowired
     private RegisterService registerService;
 
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> doLogin(@RequestBody LoginDTO loginDTO) {
@@ -50,5 +56,25 @@ public class AuthController {
     public ResponseEntity<?> resendVerificationToken(@RequestParam String token, HttpServletRequest request) throws MessagingException, UnsupportedEncodingException {
         registerService.resendVerificationTokenEmail(token, request);
         return ResponseEntity.ok("verification token has been sent. Please check mail to verify again!");
+    }
+
+
+    @PostMapping("/password-reset")
+    public ResponseEntity<?> forgetPassword(@RequestBody PasswordResetRequest passwordResetRequest, HttpServletRequest request) {
+        userService.sendMailWithToken(passwordResetRequest, request);
+        return ResponseEntity.status(HttpStatus.OK).body(
+
+                SendMailResponse.builder()
+                        .httpStatus(HttpStatus.OK)
+                        .message("Gửi mail thành công! Vui lòng check mail để xác thực")
+                        .build()
+        );
+    }
+
+    @Transactional
+    @PostMapping("/password-reset/create-new-password")
+    public ResponseEntity<String> createNewPassword(@RequestParam String token,
+                                                 @RequestBody PasswordResetRequest passwordResetRequest) {
+        return ResponseEntity.ok(userService.createNewPassword(token, passwordResetRequest));
     }
 }

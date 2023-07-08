@@ -1,7 +1,7 @@
 package com.example.blogapprestapi.controller;
 
-import com.example.blogapprestapi.model.dto.PostDTO;
-import com.example.blogapprestapi.model.dto.PostDTOv2;
+import com.example.blogapprestapi.model.dto.request.PostDTO;
+import com.example.blogapprestapi.model.dto.request.PostDTOv2;
 import com.example.blogapprestapi.model.dto.response.PostPaginationResponse;
 import com.example.blogapprestapi.service.PostService;
 import com.example.blogapprestapi.utils.Constants;

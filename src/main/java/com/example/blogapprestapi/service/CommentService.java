@@ -1,7 +1,6 @@
 package com.example.blogapprestapi.service;
 
-import com.example.blogapprestapi.model.dto.CommentDTO;
-import com.example.blogapprestapi.model.entity.Comment;
+import com.example.blogapprestapi.model.dto.request.CommentDTO;
 
 import java.util.List;
 

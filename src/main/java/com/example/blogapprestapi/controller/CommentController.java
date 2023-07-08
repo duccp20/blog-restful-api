@@ -1,6 +1,6 @@
 package com.example.blogapprestapi.controller;
 
-import com.example.blogapprestapi.model.dto.CommentDTO;
+import com.example.blogapprestapi.model.dto.request.CommentDTO;
 import com.example.blogapprestapi.service.CommentService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,16 +1,17 @@
 package com.example.blogapprestapi.service.impl;
 
 import com.example.blogapprestapi.event.RegistrationCompleteEvent;
-import com.example.blogapprestapi.event.listener.RegistrationCompleteEventListener;
 import com.example.blogapprestapi.exception.BlogApiException;
 import com.example.blogapprestapi.exception.ResourceNotFoundException;
-import com.example.blogapprestapi.model.dto.RegisterDTO;
+import com.example.blogapprestapi.mail.EmailDetails;
+import com.example.blogapprestapi.model.dto.request.RegisterDTO;
 import com.example.blogapprestapi.model.entity.Role;
 import com.example.blogapprestapi.model.entity.Token;
 import com.example.blogapprestapi.model.entity.User;
 import com.example.blogapprestapi.repository.RoleRepository;
 import com.example.blogapprestapi.repository.TokenRepository;
 import com.example.blogapprestapi.repository.UserRepository;
+import com.example.blogapprestapi.service.EmailDetailsService;
 import com.example.blogapprestapi.service.RegisterService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.UnsupportedEncodingException;
-import java.time.LocalDateTime;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Set;
@@ -46,7 +46,7 @@ public class RegisterServiceImpl implements RegisterService {
     private ApplicationEventPublisher publisher;
 
     @Autowired
-    private RegistrationCompleteEventListener listener;
+    private EmailDetailsService emailDetailsService;
 
     @Autowired
     private HttpServletRequest servletRequest;
@@ -123,11 +123,26 @@ public class RegisterServiceImpl implements RegisterService {
 
     private void resendEmail(String token, String applicationUrl) throws MessagingException, UnsupportedEncodingException {
         String url = applicationUrl + "/api/v1/auth/register/verifyEmail?token=" + token;
-        listener.sendVerificationEmail(url);
+        Token userFromToken = tokenRepository.findByToken(token).orElseThrow(() -> new BlogApiException(
+                HttpStatus.BAD_REQUEST, "This token not found"));
+        try {
+            EmailDetails emailDetails = EmailDetails
+                    .builder()
+                    .subject("Email Verification")
+                    .senderName("User Registration Portal Service")
+                    .mailRecipient(userFromToken.getUser().getEmail())
+                    .content("<p> Hi, " + userFromToken.getUser().getName() + "! </p>" +
+                            "<p>Thank you for registering with us. </p>" +
+                            "Please, follow the link below to complete your registration.</p>" +
+                            "<a href=\"" + url + "\">Verify your email to activate your account</a>" +
+                            "<p>Thank you! <br> Users Registration Portal Service")
+                    .build();
+            emailDetailsService.sendMailWithAttachment(emailDetails);
+            log.info("Vui lòng check email: " + url);
+        } catch (MessagingException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
-
-    ;
-
     private String applicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
     }

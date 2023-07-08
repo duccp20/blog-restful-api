@@ -1,12 +1,11 @@
 package com.example.blogapprestapi.service.impl;
 
 import com.example.blogapprestapi.exception.ResourceNotFoundException;
-import com.example.blogapprestapi.model.dto.PostDTO;
+import com.example.blogapprestapi.model.dto.request.PostDTO;
 import com.example.blogapprestapi.model.dto.response.PostPaginationResponse;
 import com.example.blogapprestapi.model.entity.Category;
 import com.example.blogapprestapi.model.entity.Post;
 import com.example.blogapprestapi.repository.CategoryRepository;
-import com.example.blogapprestapi.repository.CommentRepository;
 import com.example.blogapprestapi.repository.PostRepository;
 import com.example.blogapprestapi.service.PostService;
 import org.modelmapper.ModelMapper;

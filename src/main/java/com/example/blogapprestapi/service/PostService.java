@@ -1,6 +1,6 @@
 package com.example.blogapprestapi.service;
 
-import com.example.blogapprestapi.model.dto.PostDTO;
+import com.example.blogapprestapi.model.dto.request.PostDTO;
 import com.example.blogapprestapi.model.dto.response.PostPaginationResponse;
 
 import java.util.List;

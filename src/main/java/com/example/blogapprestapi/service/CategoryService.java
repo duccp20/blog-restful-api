@@ -1,6 +1,6 @@
 package com.example.blogapprestapi.service;
 
-import com.example.blogapprestapi.model.dto.CategoryDTO;
+import com.example.blogapprestapi.model.dto.request.CategoryDTO;
 
 import java.util.List;
 

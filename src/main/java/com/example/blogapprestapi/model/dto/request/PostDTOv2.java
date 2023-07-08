@@ -1,22 +1,22 @@
-package com.example.blogapprestapi.model.dto;
+package com.example.blogapprestapi.model.dto.request;
 
-
+import com.example.blogapprestapi.model.dto.request.CommentDTO;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
+import java.util.List;
 import java.util.Set;
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class PostDTO {
-
+public class PostDTOv2 {
     private Long id;
-    //không đc phép null or empty
-    //nhập ít nhất 3 ký tự
     @NotEmpty
     @NotNull
     @Size(min = 2, message = "Post title should have at least 2 characters")
@@ -30,6 +30,6 @@ public class PostDTO {
     @NotNull
     private String content;
     private Set<CommentDTO> comments;
-
     private Long categoryId;
+    private List<String> tags;
 }

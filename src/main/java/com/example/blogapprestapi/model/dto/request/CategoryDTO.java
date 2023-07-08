@@ -1,4 +1,4 @@
-package com.example.blogapprestapi.model.dto;
+package com.example.blogapprestapi.model.dto.request;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -7,15 +7,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
 @Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginDTO {
+public class CategoryDTO {
+    private Long id;
     @NotEmpty
     @NotNull
-    private String usernameOrEmail;
-    @NotEmpty
-    @NotNull
-    private String password;
+    private String name;
+    private String description;
+
+
 }

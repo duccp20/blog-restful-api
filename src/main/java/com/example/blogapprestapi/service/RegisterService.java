@@ -1,8 +1,7 @@
 package com.example.blogapprestapi.service;
 
-import com.example.blogapprestapi.model.dto.RegisterDTO;
+import com.example.blogapprestapi.model.dto.request.RegisterDTO;
 import com.example.blogapprestapi.model.entity.Token;
-import com.example.blogapprestapi.model.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 

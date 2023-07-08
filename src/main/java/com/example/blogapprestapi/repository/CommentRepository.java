@@ -1,6 +1,5 @@
 package com.example.blogapprestapi.repository;
 
-import com.example.blogapprestapi.model.dto.CommentDTO;
 import com.example.blogapprestapi.model.entity.Comment;
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,8 +1,7 @@
 package com.example.blogapprestapi.service.impl;
 
 import com.example.blogapprestapi.exception.BlogApiException;
-import com.example.blogapprestapi.exception.ResourceNotFoundException;
-import com.example.blogapprestapi.model.dto.LoginDTO;
+import com.example.blogapprestapi.model.dto.request.LoginDTO;
 
 import com.example.blogapprestapi.model.entity.User;
 import com.example.blogapprestapi.repository.UserRepository;

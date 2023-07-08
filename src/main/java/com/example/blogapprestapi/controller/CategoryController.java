@@ -1,6 +1,6 @@
 package com.example.blogapprestapi.controller;
 
-import com.example.blogapprestapi.model.dto.CategoryDTO;
+import com.example.blogapprestapi.model.dto.request.CategoryDTO;
 import com.example.blogapprestapi.service.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
