@@ -96,8 +96,14 @@ public class UserServiceImpl implements UserService {
                     "<a href=\"" + url + "\">Verify your email to activate your account</a>";
 
         }
+        //check password and confirm password
         if (!passwordResetRequest.getNewPassword().equals(passwordResetRequest.getConfirmPassword())) {
             throw new BlogApiException(HttpStatus.BAD_REQUEST, "NEW PASSWORD AND CONFIRM PASSWORD NOT VALID!");
+        }
+
+        //check new pass and old pass
+        if(checkNewPassAndOldPass(passwordResetRequest.getNewPassword(), passwordResetToken.getUser())) {
+            throw new BlogApiException(HttpStatus.BAD_REQUEST, "New Password equal to Old Password!");
         }
         User user = passwordResetToken.getUser();
         user.setPassword(passwordEncoder.encode(passwordResetRequest.getNewPassword()));
@@ -109,5 +115,9 @@ public class UserServiceImpl implements UserService {
 
     private String applicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+    }
+
+    private boolean checkNewPassAndOldPass(String newPass, User user) {
+        return passwordEncoder.matches(newPass, user.getPassword());
     }
 }
