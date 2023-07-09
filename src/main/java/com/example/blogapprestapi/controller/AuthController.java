@@ -1,16 +1,16 @@
 package com.example.blogapprestapi.controller;
 
-import com.example.blogapprestapi.model.dto.request.LoginDTO;
-import com.example.blogapprestapi.model.dto.request.PasswordResetRequest;
-import com.example.blogapprestapi.model.dto.request.RegisterDTO;
-import com.example.blogapprestapi.model.dto.response.JwtAuthResponse;
+import com.example.blogapprestapi.model.dto.request.*;
+import com.example.blogapprestapi.model.dto.response.JwtTokenResponse;
 import com.example.blogapprestapi.model.dto.response.SendMailResponse;
 import com.example.blogapprestapi.service.LoginService;
+import com.example.blogapprestapi.service.RefreshTokenService;
 import com.example.blogapprestapi.service.RegisterService;
 import com.example.blogapprestapi.service.UserService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,14 +28,18 @@ public class AuthController {
     private RegisterService registerService;
 
     @Autowired
+    private RefreshTokenService refreshTokenService;
+    @Autowired
     private UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtAuthResponse> doLogin(@RequestBody LoginDTO loginDTO) {
-        String token = loginService.doLogin(loginDTO); //handle trong service
-        JwtAuthResponse jwtAuthResponse = new JwtAuthResponse(); //tạo 1 instance của response
-        jwtAuthResponse.setToken(token); //set token cho response
-        return ResponseEntity.ok(jwtAuthResponse);
+    public ResponseEntity<?> doLogin(@RequestBody LoginDTO loginDTO) {
+        return ResponseEntity.ok(loginService.doLogin(loginDTO));
+    }
+
+    @PostMapping("/refresh-token")
+    public  ResponseEntity<?> doRefreshToken(HttpServletRequest request) {
+        return ResponseEntity.ok(refreshTokenService.doRefreshToken(request));
     }
 
 
@@ -59,7 +63,7 @@ public class AuthController {
 
 
     @PostMapping("/password-reset")
-    public ResponseEntity<?> forgetPassword(@RequestBody PasswordResetRequest passwordResetRequest, HttpServletRequest request) {
+    public ResponseEntity<?> resetPassword(@RequestBody PasswordResetRequest passwordResetRequest, HttpServletRequest request) {
         userService.sendMailWithToken(passwordResetRequest, request);
         return ResponseEntity.status(HttpStatus.OK).body(
 
@@ -80,5 +84,12 @@ public class AuthController {
     @PostMapping("/password-reset/resend-token")
     public ResponseEntity<String> resendTokenForResetPassword(@RequestParam String token) {
         return ResponseEntity.ok(userService.handleResendTokenForResetPassword(token));
+    }
+
+
+    @PostMapping("/change-password")
+    public ResponseEntity<String> changePasswordByToken(@RequestBody PasswordChangeRequest passwordChangeRequest,
+                                                   HttpServletRequest request) {
+        return ResponseEntity.ok(userService.changePasswordByToken(passwordChangeRequest, request));
     }
 }

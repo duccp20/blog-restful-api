@@ -27,3 +27,12 @@ spring:
       auth: true
       starttls.enable: true
 
+
+application:
+  security:
+    jwt:
+      secret-key: kiGtJXhv5R86NBx8gS7kO9TRq6XKP5Pzs44cEpgAzNA=
+      expiration: 30000 # a day
+      refresh:
+        expiration: 300000 # 7 days
+

@@ -2,11 +2,14 @@ package com.example.blogapprestapi.service.impl;
 
 import com.example.blogapprestapi.exception.BlogApiException;
 import com.example.blogapprestapi.mail.EmailDetails;
+import com.example.blogapprestapi.model.dto.request.PasswordChangeRequest;
 import com.example.blogapprestapi.model.dto.request.PasswordResetRequest;
 import com.example.blogapprestapi.model.entity.PasswordResetToken;
 import com.example.blogapprestapi.model.entity.User;
 import com.example.blogapprestapi.repository.PasswordResetTokenRepository;
 import com.example.blogapprestapi.repository.UserRepository;
+import com.example.blogapprestapi.security.jwt.JwtAuthFilter;
+import com.example.blogapprestapi.security.jwt.JwtAuthProvider;
 import com.example.blogapprestapi.service.EmailDetailsService;
 import com.example.blogapprestapi.service.UserService;
 import jakarta.mail.MessagingException;
@@ -15,8 +18,12 @@ import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
@@ -41,6 +48,18 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtAuthProvider jwtAuthProvider;
+
+    @Autowired
+    private JwtAuthFilter jwtAuthFilter;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Override
     public void sendMailWithToken(PasswordResetRequest mail, HttpServletRequest request) {
@@ -76,7 +95,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public String createNewPassword(String token, PasswordResetRequest passwordResetRequest) {
         //url resend verify password
-        String urlResend = applicationUrl(servletRequest) + "/api/v1/auth/password-reset/resend-token?token="+token;
+        String urlResend = applicationUrl(servletRequest) + "/api/v1/auth/password-reset/resend-token?token=" + token;
         //compare token with token in db
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findByToken(token).
                 orElseThrow(() -> new BlogApiException(HttpStatus.BAD_REQUEST, "TOKEN NOT FOUND IN SYSTEM!"));
@@ -95,7 +114,7 @@ public class UserServiceImpl implements UserService {
         }
 
         //check new pass and old pass
-        if(checkNewPassAndOldPass(passwordResetRequest.getNewPassword(), passwordResetToken.getUser())) {
+        if (checkNewPassAndOldPass(passwordResetRequest.getNewPassword(), passwordResetToken.getUser())) {
             throw new BlogApiException(HttpStatus.BAD_REQUEST, "New Password equal to Old Password!");
         }
 
@@ -107,7 +126,7 @@ public class UserServiceImpl implements UserService {
         //sau khi save user thì xóa cái token vừa tạo đi
         passwordResetTokenRepository.deleteByToken(token);
         return "Đã đổi mật khẩu thành công!";
-        }
+    }
 
     @Override
     public String handleResendTokenForResetPassword(String token) {
@@ -149,6 +168,39 @@ public class UserServiceImpl implements UserService {
         return "Đã gửi mail thành công! " + url;
     }
 
+    @Override
+    public String changePasswordByToken(PasswordChangeRequest passwordChangeRequest, HttpServletRequest request) {
+        //get token
+        String token = jwtAuthFilter.getTokenFromRequest(request);
+        //validate token
+        if (StringUtils.hasText(token) && jwtAuthProvider.validateToken(token)) {
+            //get user name from claims in token
+            String username = jwtAuthProvider.getUsername(token);
+
+            //from username get user
+            User user = userRepository.findByUsername(username).orElseThrow(
+                    () -> new UsernameNotFoundException("User not found!")
+            );
+            //check new pass have equal to old pass
+            if (checkNewPassAndOldPass(passwordChangeRequest.getNewPassword(), user)) {
+                throw new BlogApiException(HttpStatus.BAD_REQUEST, "New and old password are the same!");
+            }
+
+            //check old password have equal in password in db
+            if (checkIfValidOldPassword(user, passwordChangeRequest.getOldPassword())) {
+                user.setPassword(passwordEncoder.encode(passwordChangeRequest.getNewPassword()));
+                userRepository.save(user);
+            } else {
+                throw new BlogApiException(HttpStatus.BAD_REQUEST, "Old password is wrong!");
+            }
+
+        } else {
+            throw new BlogApiException(HttpStatus.BAD_REQUEST, "Invalid credentials");
+//            }
+        }
+        return "Change password successfully!";
+    }
+
 
     private String applicationUrl(HttpServletRequest request) {
         return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
@@ -156,5 +208,9 @@ public class UserServiceImpl implements UserService {
 
     private boolean checkNewPassAndOldPass(String newPass, User user) {
         return passwordEncoder.matches(newPass, user.getPassword());
+    }
+
+    private boolean checkIfValidOldPassword(User user, String oldPass) {
+        return passwordEncoder.matches(oldPass, user.getPassword());
     }
 }

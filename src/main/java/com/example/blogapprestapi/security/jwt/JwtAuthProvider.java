@@ -2,8 +2,10 @@ package com.example.blogapprestapi.security.jwt;
 
 import com.example.blogapprestapi.exception.BlogApiException;
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -11,27 +13,38 @@ import java.util.Date;
 @Component
 public class JwtAuthProvider {
 
-    private static final long EXPIRATION_TIME = 86400000;
+    @Value("${application.security.jwt.expiration}")
+    private long expirationTime;
 
-    private static final String KEY = "kiGtJXhv5R86NBx8gS7kO9TRq6XKP5Pzs44cEpgAzNA=";
+    @Value("${application.security.jwt.refresh.expiration}")
+    private long refreshExpirationTime;
 
-    public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+    @Value("${application.security.jwt.secret-key}")
+    private String key;
 
-        String token = Jwts.builder()
+    public String generateToken(UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(new Date().getTime() + EXPIRATION_TIME))
-                .signWith(SignatureAlgorithm.HS256, KEY)
+                .setExpiration(new Date(new Date().getTime() + expirationTime))
+                .signWith(SignatureAlgorithm.HS256, key)
                 .compact();
-
-        return token;
     }
 
+    public String generateRefreshToken(UserDetails userDetails) {
+        String username = userDetails.getUsername();
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(new Date().getTime() + refreshExpirationTime))
+                .signWith(SignatureAlgorithm.HS256, key)
+                .compact();
+    }
 
     public String getUsername(String token){
         Claims claims = Jwts.parserBuilder()
-                .setSigningKey(KEY)
+                .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -42,7 +55,7 @@ public class JwtAuthProvider {
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder()
-                    .setSigningKey(KEY)
+                    .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
             return true;
