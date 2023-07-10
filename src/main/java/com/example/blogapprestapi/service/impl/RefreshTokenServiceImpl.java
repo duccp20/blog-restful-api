@@ -17,6 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -34,9 +35,6 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Autowired
     private JwtAuthFilter jwtAuthFilter;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
-
     @Override
     public Object doRefreshToken(HttpServletRequest request) {
 
@@ -46,19 +44,16 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             String username = jwtAuthProvider.getUsername(refreshToken);
             User user = userRepository.findByUsernameOrEmail(username, username).orElseThrow(
                     () -> new BlogApiException(HttpStatus.BAD_REQUEST, "Invalid Username Or Email"));
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, user.getPassword()));
-            if (authentication.isAuthenticated()) {
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                UserDetails userDetails = (UserPrincipal) authentication.getPrincipal();
-                accessToken= jwtAuthProvider.generateToken(userDetails);
-            } else {
-                throw new BlogApiException(HttpStatus.UNAUTHORIZED, "Khong AUthen duoc!");
-            }
-
+            accessToken = jwtAuthProvider.generateToken(user.getUsername());
+        } else {
+            throw new BlogApiException(HttpStatus.UNAUTHORIZED, "Khong AUthen duoc!");
         }
         return JwtTokenRefreshResponse.builder()
-                .refreshToken(refreshToken)
                 .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .tokenType("Bearer")
                 .build();
     }
+
+
 }

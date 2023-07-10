@@ -22,8 +22,7 @@ public class JwtAuthProvider {
     @Value("${application.security.jwt.secret-key}")
     private String key;
 
-    public String generateToken(UserDetails userDetails) {
-        String username = userDetails.getUsername();
+    public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())

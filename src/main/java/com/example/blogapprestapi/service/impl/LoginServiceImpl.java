@@ -52,7 +52,8 @@ public class LoginServiceImpl implements LoginService {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getUsernameOrEmail(), loginDTO.getPassword()));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetails userDetails = (UserPrincipal) authentication.getPrincipal();
-        String token = jwtAuthProvider.generateToken(userDetails);
+        String username = userDetails.getUsername();
+        String token = jwtAuthProvider.generateToken(username);
 
         List<String> roles = userDetails.getAuthorities()
                 .stream().map(GrantedAuthority::getAuthority).toList();
