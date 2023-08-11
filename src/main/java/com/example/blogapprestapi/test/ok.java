@@ -2,6 +2,6 @@ package com.example.blogapprestapi.test;
 
 public class ok {
     public static void main(String[] args) {
-        System.out.println("OK1234556");
+        System.out.println("OK");
     }
 }
