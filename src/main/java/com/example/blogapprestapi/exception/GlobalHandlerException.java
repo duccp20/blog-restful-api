@@ -52,10 +52,10 @@ public class GlobalHandlerException {
     }
 
     //Lưu ý chọn đúng class security.access thay vì .java
-    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
-    public ResponseEntity<ErrorMessage> handlerAccessDeniedException(AccessDeniedException exception, WebRequest webRequest) {
-        ErrorMessage  errorMessage = new ErrorMessage(HttpStatus.UNAUTHORIZED, exception.getMessage(), webRequest.getDescription(false));
-        return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
-    }
+//    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+//    public ResponseEntity<ErrorMessage> handlerAccessDeniedException(AccessDeniedException exception, WebRequest webRequest) {
+//        ErrorMessage  errorMessage = new ErrorMessage(HttpStatus.UNAUTHORIZED, exception.getMessage(), webRequest.getDescription(false));
+//        return new ResponseEntity<>(errorMessage, HttpStatus.UNAUTHORIZED);
+//    }
 
 }
