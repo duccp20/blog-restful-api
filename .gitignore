@@ -32,5 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 
+!/src/main/java/com/example/blogapprestapi/test/ok.java
 
-!**/src/main/java/com/example/blogapprestapi/test/
