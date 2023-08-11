@@ -9,7 +9,6 @@ import com.example.blogapprestapi.repository.UserRepository;
 import com.example.blogapprestapi.security.UserPrincipal;
 import com.example.blogapprestapi.security.jwt.JwtAuthProvider;
 import com.example.blogapprestapi.service.LoginService;
-import com.example.blogapprestapi.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
