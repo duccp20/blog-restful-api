@@ -32,4 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 
-C:\workplace\backend\java\project\blog-restful-api\src\main\java\com\example\blogapprestapi\utils
+
+!/src/main/java/com/example/blogapprestapi/utils/
