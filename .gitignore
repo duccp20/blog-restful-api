@@ -33,4 +33,4 @@ build/
 .vscode/
 
 
-src/main/java/com/example/blogapprestapi/test/
+!/src/main/java/com/example/blogapprestapi/test/
