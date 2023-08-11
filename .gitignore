@@ -32,5 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 
-
-!/src/main/java/com/example/blogapprestapi/utils/
+src/main/java/com/example/blogapprestapi/test/
