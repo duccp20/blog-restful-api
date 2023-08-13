@@ -29,9 +29,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-### VS Code ###
-.vscode/
-
-src/main/java/com/example/blogapprestapi/utils/
+### VS Code ###/
+.vscode
 
 src/main/java/com/example/blogapprestapi/test/
